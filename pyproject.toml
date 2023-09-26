@@ -1,0 +1,36 @@
+
+[build-system]
+requires = [
+    "setuptools>=42",
+    "setuptools_scm[toml]>=3.4.3",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "src/ringdown-injection-pipe/_version.py"
+
+
+[project]
+name = "ringdown-injection-pipe"
+
+authors = [
+  { name="David Dzingeleski", email="david.dzingeleski@ligo.org" },
+  { name="Rhiannon Udall", email="rhiannon.udall@ligo.org" },
+]
+description = "A package for doing many injections with the ringdown code"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr ="ringdown-injection-pipe._version.__version__" }
+
+[project.urls]
+"Homepage" = "https://github.com/rhiannon-udall/ringdown-injection-pipe"
+"Bug Tracker" = "https://github.com/rhiannon-udall/ringdown-injection-pipe/issues"
