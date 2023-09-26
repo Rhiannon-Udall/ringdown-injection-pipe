@@ -8,7 +8,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
-write_to = "src/ringdown-injection-pipe/_version.py"
+write_to = "src/rdipipe/_version.py"
 
 
 [project]
@@ -29,7 +29,7 @@ classifiers = [
 dynamic = ["version"]
 
 [tool.setuptools.dynamic]
-version = {attr ="ringdown-injection-pipe._version.__version__" }
+version = {attr ="rdipipe._version.__version__" }
 
 [project.urls]
 "Homepage" = "https://github.com/rhiannon-udall/ringdown-injection-pipe"
