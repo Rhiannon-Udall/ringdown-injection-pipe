@@ -17,5 +17,6 @@
   "ra": 1.375,
   "dec": -1.2108,
   "f_low": 20,
-  "f_ref": 20
+  "f_ref": 20,
+  "inclination": 0
 }

@@ -16,6 +16,7 @@ def parse():
     )
     args = parser.parse_args()
     return args
+
 #read file and name
 args=parse()
 file = args.file
@@ -41,7 +42,7 @@ dag.set_dag_file(os.path.join(pipeline_dir, "dag_{}".format(name)))
 worker_job = condorutils.standard_job_constructor(
     "save_data.py",
     name,
-    f"--M $(M) --q $(q) --spin1 $(spin1) --spin2 $(spin2) --snr $(snr) --distance $(distance)",
+    f"--M $(M) --q $(q) --spin1 $(spin1) --spin2 $(spin2) --snr $(snr) --distance $(distance) --inclination $(inclination)",
     user_name=ligo_user_name,
     accounting=ligo_accounting,
     request_memory="4 Gb",
@@ -59,6 +60,7 @@ mass = np.array(data["mass"])
 mass_ratio = np.array(data["mass_ratio"])
 spin_1 = np.array(data["spin_1"])
 spin_2 = np.array(data["spin_2"])
+inclination = np.array(data["inclination"])
 #read SNRs at 1 Mpc and reshape to be a multidimensional array
 SNRs_at_1 = np.reshape(np.array(data["SNRs_at_1"]),(len(mass),len(mass_ratio),len(spin_1),len(spin_2)))
 SNR = np.array(data["SNR"])
@@ -69,14 +71,15 @@ for i in range(len(mass)):
         for k in range(len(spin_1)):
             for l in range(len(spin_2)):
                 for m in range(len(SNR)):
-                    #create a job with parameter combinations
-                    worker_node = condorutils.standard_node_constructor(
-                        worker_job,
-                        dag,
-                        macros=[("M", mass[i]), ("q", mass_ratio[j]), ("spin1", spin_1[k]), ("spin2", spin_2[l]), ("snr", SNR[m]), ("distance", SNRs_at_1[i][j][k][l]/SNR[m])],
-                        )
-                    #add job to list
-                    worker_nodes += [worker_node]
+                    for n in range(len(inclination)):
+                        #create a job with parameter combinations
+                        worker_node = condorutils.standard_node_constructor(
+                            worker_job,
+                            dag,
+                            macros=[("M", mass[i]), ("q", mass_ratio[j]), ("spin1", spin_1[k]), ("spin2", spin_2[l]), ("snr", SNR[m]), ("distance", SNRs_at_1[i][j][k][l]/SNR[m]), ("inclination", inclination[n])],
+                            )
+                        #add job to list
+                        worker_nodes += [worker_node]
 
 # Write sub files and dag
 dag.write_sub_files()
