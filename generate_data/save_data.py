@@ -1,11 +1,8 @@
 #!/home/rhiannon.udall/.conda/envs/ringdown-nrsur/bin/python3
 import os
 import numpy as np
-import arviz as az
 import pandas as pd
-import seaborn as sns
 import json
-import sys
 import configparser
 import ringdown
 
