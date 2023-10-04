@@ -7,7 +7,7 @@ import seaborn as sns
 import json
 import sys
 import ringdown as rd
-import pycbc.detector
+import lal
 
 os.environ["LAL_DATA_PATH"] = "/home/rhiannon.udall/.conda/envs/ringdown-nrsur/opt/lalsuite-extra/share/lalsimulation"
 #read values of mass, mass ratio, and component spins from input file
@@ -47,12 +47,9 @@ for i in range(len(mass)):
                 #update the injection file
                 with open("/home/davidjay.dzingeleski/config_tests/generate_data/injection_kws.json","w") as file_object:
                     json.dump(json_data,file_object,indent=2)
-                #create detector objects
-                dh = pycbc.detector.Detector("H1")
-                dl = pycbc.detector.Detector("L1")
                 #calculate delays for the detectors given sky location and time
-                delayh = dh.time_delay_from_earth_center(ra,dec,time)
-                delayl = dl.time_delay_from_earth_center(ra,dec,time)
+                delayh = lal.TimeDelayFromEarthCenter(lal.cached_detector_by_prefix["H1"].location,ra,dec,time)
+                delayl = lal.TimeDelayFromEarthCenter(lal.cached_detector_by_prefix["L1"].location,ra,dec,time)
                 #load the fit to create the injection data
                 fit = rd.fit.Fit.from_config("/home/davidjay.dzingeleski/config_tests/generate_data/test_injection.ini")
                 #select the data after the merger
