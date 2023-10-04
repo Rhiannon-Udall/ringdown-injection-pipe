@@ -1,6 +1,7 @@
 from rdipipe import condorutils
 import os
 from glue import pipeline
+import sys
 import numpy as np
 import json
 
@@ -41,7 +42,7 @@ dag.set_dag_file(os.path.join(pipeline_dir, "dag_{}".format(name)))
 worker_job = condorutils.standard_job_constructor(
     "ringdownfit.py",
     name,
-    f"--M $(M) --q $(q) --spin1 $(spin1) --spin2 $(spin2) --snr $(snr) --time $(time)",
+    f"--M $(M) --q $(q) --spin1 $(spin1) --spin2 $(spin2) --snr $(snr) --time $(time) --inclination $(inclination) --modes $(modes)",
     user_name=ligo_user_name,
     accounting=ligo_accounting,
     request_memory="4 Gb",
@@ -62,6 +63,8 @@ spin_1 = np.array(data["spin_1"])
 spin_2 = np.array(data["spin_2"])
 time = np.array(data["time"])
 SNR = np.array(data["SNR"])
+inclination = np.array(data["inclination"])
+modes = np.array(data["modes"])
 #set up list of parameter combinations
 worker_nodes = []
 for i in range(len(mass)):
@@ -70,14 +73,16 @@ for i in range(len(mass)):
             for l in range(len(spin_2)):
                 for m in range(len(SNR)):
                     for n in range(len(time)):
-                        #set up job with combination of parameters
-                        worker_node = condorutils.standard_node_constructor(
-                            worker_job,
-                            dag,
-                            macros=[("M", mass[i]), ("q", mass_ratio[j]), ("spin1", spin_1[k]), ("spin2", spin_2[l]), ("snr", SNR[m]), ("time", 1126259463.413 + time[n]*mass[i]*t_sun)],
-                            )
-                        #add job to the list
-                        worker_nodes += [worker_node]
+                        for o in range(len(inclination)):
+                            for p in range(len(modes)):
+                                #set up job with combination of parameters
+                                worker_node = condorutils.standard_node_constructor(
+                                    worker_job,
+                                    dag,
+                                    macros=[("M", mass[i]), ("q", mass_ratio[j]), ("spin1", spin_1[k]), ("spin2", spin_2[l]), ("snr", SNR[m]), ("time", 1126259463.413 + time[n]*mass[i]*t_sun), ("inclination", inclination[o]), ("modes", modes[p])],
+                                    )
+                                #add job to the list
+                                worker_nodes += [worker_node]
 
 # Write sub files and dag
 dag.write_sub_files()
