@@ -5,20 +5,23 @@ import sys
 import numpy as np
 import json
 
-
+#setting name and accounting tag for job submission
 ligo_user_name = "davidjay.dzingeleski"
 ligo_accounting = "ligo.dev.o4.cbc.pe.bilby"
 
+#set up directories for result files and log/error files
 pipeline_dir = os.path.join(os.getcwd(), "Results")
 os.makedirs(pipeline_dir)
 logdir = os.path.join(pipeline_dir, "logs")
 os.makedirs(logdir)
 
+#set up dag
 dag = pipeline.CondorDAG(
     log=os.path.join(pipeline_dir, "dag_{}.log".format(str(sys.argv[2])))
 )
 dag.set_dag_file(os.path.join(pipeline_dir, "dag_{}".format(str(sys.argv[2]))))
 
+#set up job with extra arguments
 worker_job = condorutils.standard_job_constructor(
     "ringdownfit.py",
     str(sys.argv[2]),
@@ -30,8 +33,10 @@ worker_job = condorutils.standard_job_constructor(
     logdir=logdir,
     extra_cmds = [["transfer_input_files","/home/davidjay.dzingeleski/config_tests/generate_tests/test_injection.ini, /home/davidjay.dzingeleski/config_tests/generate_tests/acf.csv"],["transfer_executable",True],["should_transfer_files","YES"],["getenv",True]]
 )
+#set executable for the job
 worker_job.set_executable("/home/davidjay.dzingeleski/config_tests/generate_tests/ringdownfit.py")
 
+#read parameter values from input file
 t_sun = 5*10**-6
 file = str(sys.argv[1])
 with open(file,"r") as readfile:
@@ -42,6 +47,7 @@ spin_1 = np.array(data["spin_1"])
 spin_2 = np.array(data["spin_2"])
 time = np.array(data["time"])
 SNR = np.array(data["SNR"])
+#set up list of parameter combinations
 worker_nodes = []
 for i in range(len(mass)):
     for j in range(len(mass_ratio)):
@@ -49,11 +55,13 @@ for i in range(len(mass)):
             for l in range(len(spin_2)):
                 for m in range(len(SNR)):
                     for n in range(len(time)):
+                        #set up job with combination of parameters
                         worker_node = condorutils.standard_node_constructor(
                             worker_job,
                             dag,
                             macros=[("M", mass[i]), ("q", mass_ratio[j]), ("spin1", spin_1[k]), ("spin2", spin_2[l]), ("snr", SNR[m]), ("time", 1126259463.413 + time[n]*mass[i]*t_sun)],
                             )
+                        #add job to the list
                         worker_nodes += [worker_node]
 
 # Write sub files and dag
