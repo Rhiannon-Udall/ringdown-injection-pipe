@@ -5,6 +5,22 @@ import sys
 import numpy as np
 import json
 
+def parse():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file",
+        type=str                   
+    )
+    parser.add_argument("--name",
+        type=str
+    )
+    args = parser.parse_args()
+    return args
+#read file and name
+args=parse()
+file = args.file
+name = args.name
+
 #set user name and accounting tag for submission file
 ligo_user_name = "davidjay.dzingeleski"
 ligo_accounting = "ligo.dev.o4.cbc.pe.bilby"
@@ -17,14 +33,14 @@ os.makedirs(logdir)
 
 #set up dag
 dag = pipeline.CondorDAG(
-    log=os.path.join(pipeline_dir, "dag_{}.log".format(str(sys.argv[2])))
+    log=os.path.join(pipeline_dir, "dag_{}.log".format(name))
 )
-dag.set_dag_file(os.path.join(pipeline_dir, "dag_{}".format(str(sys.argv[2]))))
+dag.set_dag_file(os.path.join(pipeline_dir, "dag_{}".format(name)))
 
 #set up job with additional commands
 worker_job = condorutils.standard_job_constructor(
     "save_data.py",
-    str(sys.argv[2]),
+    name,
     f"--M $(M) --q $(q) --spin1 $(spin1) --spin2 $(spin2) --snr $(snr) --distance $(distance)",
     user_name=ligo_user_name,
     accounting=ligo_accounting,
@@ -37,7 +53,6 @@ worker_job = condorutils.standard_job_constructor(
 worker_job.set_executable("/home/davidjay.dzingeleski/config_tests/generate_data/save_data.py")
 
 #read parameter values from input file
-file = str(sys.argv[1])
 with open(file,"r") as readfile:
     data = json.load(readfile)
 mass = np.array(data["mass"])
@@ -69,5 +84,5 @@ dag.write_dag()
 
 # Automatically submit
 os.system(
-    f"condor_submit_dag {os.path.join(pipeline_dir, 'dag_{}.dag'.format(str(sys.argv[2])))}"
+    f"condor_submit_dag {os.path.join(pipeline_dir, 'dag_{}.dag'.format(name))}"
 )
