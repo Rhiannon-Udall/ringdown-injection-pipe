@@ -1,18 +1,27 @@
 #!/home/rhiannon.udall/.conda/envs/ringdown-nrsur/bin/python3
 import os
 import numpy as np
-import arviz as az
 import pandas as pd
-import seaborn as sns
 import json
-import sys
 import ringdown as rd
 import lal
+
+def parse():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file",
+        type=str                   
+    )
+    args = parser.parse_args()
+    return args
+
+#read file
+args = parse()
+file = args.file
 
 os.environ["LAL_DATA_PATH"] = "/home/rhiannon.udall/.conda/envs/ringdown-nrsur/opt/lalsuite-extra/share/lalsimulation"
 #read values of mass, mass ratio, and component spins from input file
 f_low=20
-file = str(sys.argv[1])
 with open(file,"r") as readfile:
     data = json.load(readfile)
 mass = np.array(data["mass"])
