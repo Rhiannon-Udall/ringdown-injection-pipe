@@ -42,7 +42,7 @@ dag.set_dag_file(os.path.join(pipeline_dir, "dag_{}".format(name)))
 worker_job = condorutils.standard_job_constructor(
     "ringdownfit.py",
     name,
-    f"--M $(M) --q $(q) --spin1 $(spin1) --spin2 $(spin2) --snr $(snr) --time $(time) --inclination $(inclination) --modes $(modes)",
+    f"--M $(M) --q $(q) --a1 $(a1) --a2 $(a2) --theta1 $(theta1) --theta2 $(theta2) --phi1 $(phi1) --phi2 $(phi2) --snr $(snr) --time $(time) --inclination $(inclination) --modes $(modes)",
     user_name=ligo_user_name,
     accounting=ligo_accounting,
     request_memory="4 Gb",
@@ -59,8 +59,12 @@ with open(file,"r") as readfile:
     data = json.load(readfile)
 mass = np.array(data["mass"])
 mass_ratio = np.array(data["mass_ratio"])
-spin_1 = np.array(data["spin_1"])
-spin_2 = np.array(data["spin_2"])
+a1 = np.array(data["a1"])
+a2 = np.array(data["a2"])
+theta1 = np.array(data["theta1"])
+theta2 = np.array(data["theta2"])
+phi1 = np.array(data["phi1"])
+phi2 = np.array(data["phi2"])
 time = np.array(data["time"])
 SNR = np.array(data["SNR"])
 inclination = np.array(data["inclination"])
@@ -69,20 +73,24 @@ modes = np.array(data["modes"])
 worker_nodes = []
 for i in range(len(mass)):
     for j in range(len(mass_ratio)):
-        for k in range(len(spin_1)):
-            for l in range(len(spin_2)):
-                for m in range(len(SNR)):
-                    for n in range(len(time)):
-                        for o in range(len(inclination)):
-                            for p in range(len(modes)):
-                                #set up job with combination of parameters
-                                worker_node = condorutils.standard_node_constructor(
-                                    worker_job,
-                                    dag,
-                                    macros=[("M", mass[i]), ("q", mass_ratio[j]), ("spin1", spin_1[k]), ("spin2", spin_2[l]), ("snr", SNR[m]), ("time", 1126259463.413 + time[n]*mass[i]*t_sun), ("inclination", inclination[o]), ("modes", modes[p])],
-                                    )
-                                #add job to the list
-                                worker_nodes += [worker_node]
+        for k in range(len(a1)):
+            for l in range(len(a2)):
+                for m in range(len(theta1)):
+                    for n in range(len(theta2)):
+                        for o in range(len(phi1)):
+                            for p in range(len(phi2)):
+                                for q in range(len(SNR)):
+                                    for r in range(len(time)):
+                                        for s in range(len(inclination)):
+                                            for t in range(len(modes)):
+                                                #set up job with combination of parameters
+                                                worker_node = condorutils.standard_node_constructor(
+                                                    worker_job,
+                                                    dag,
+                                                    macros=[("M", mass[i]), ("q", mass_ratio[j]), ("a1", a1[k]), ("a2", a2[l]), ("theta1", theta1[m]), ("theta2", theta2[n]), ("phi1", phi1[o]), ("phi2", phi2[p]), ("snr", SNR[q]), ("time", 1126259463.413 + time[r]*mass[i]*t_sun), ("inclination", inclination[s]), ("modes", modes[t])],
+                                                    )
+                                                #add job to the list
+                                                worker_nodes += [worker_node]
 
 # Write sub files and dag
 dag.write_sub_files()
